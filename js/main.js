@@ -29,6 +29,32 @@
 
 		});
 
+	var InvoiceListView = Backbone.View.extend({
+		//Define template using templating engine from Underscore.js
+		template: _.template('Displaying list of invoices'),
+
+		//Render view
+		render: function(){
+			//Generate HTML by rendering the template
+			var html = this.template();
+			$(this.el).html(html);
+		},
+	});
+
+	var InvoicePageView = Backbone.View.extend({
+		// Define template using templating engining from Underscore.js
+		template: _.template('Displaying invoice #\
+			<%=id%>'),
+		//Render view
+		render: function(){
+			var html= this.template({
+				id: this.id
+			});
+			$(this.el).html(html);
+
+		},
+	});
+
 	var InvoiceItemModel = Backbone.Model.extend({
 
 			//Set default values.
@@ -43,6 +69,33 @@
 			}
 		});
 
+	var Workspace = Backbone.Router.extend({
+		routes : {
+			//Default path
+			'': 'invoiceList',
+
+			//Use of static path
+			'invoice': 'invoiceList',
+
+			//Use of fragment parameter
+			'invoice/:id': 'invoicePage',
+		},
+
+		invoiceList: function(){
+			var invoiceListView = new InvoiceListView({
+				el: 'body'
+			});
+			invoiceListView.render();
+		},
+
+		invoicePage: function(id){
+			var invoicePageView = new InvoicePageView({
+				el: 'body',
+				id: id
+			});
+			invoicePageView.render();
+		}
+	});
 
 	$(document).ready(function(){
 		
@@ -57,6 +110,8 @@
 		});
 
 		previewInvoiceItemView.render();
+		new Workspace();
+		Backbone.history.start();
 
 	});
 })(jQuery);
