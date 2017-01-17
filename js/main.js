@@ -1,5 +1,22 @@
 (function($){
 
+	var BuyerModel = Backbone.Model.extend({
+		defaults: {
+			name: '',
+			age: ''
+		},
+
+		//Define validation criteria
+		validation: {
+			name: {
+				required: true
+			},
+			age: {
+				min: 18
+			}
+		}
+	});
+
 	var PreviewInvoiceItemView = Backbone.View.extend({
 
 			//Define template using templating engine from Underscore.js.
@@ -55,6 +72,42 @@
 		},
 	});
 
+	var BuyerModelFormView = Backbone.View.extend({
+		//Bind Backbone.validation to a view.
+		initialize: function(){
+			Backbone.Validation.bind(this);
+		},
+
+		template: _.template('\
+			<form>\
+				Enter name:\
+				<input name="name" type="text" value="<%=name%>"><br>\
+				Enter age:\
+				<input name="age" type="text" value="<%=age%>"><br>\
+				<input type="button" name="save" value="save">\
+			</form>\
+			'),
+
+		render: function(){
+			var html  = this.template(this.model.toJSON());
+
+			$(this.el).html(html);
+		},
+
+		//Bind save callback click event
+		events: {
+			'click [name~="save"]': 'save'
+		},
+
+		save: function(){
+			//Update model attributes.
+			this.model.set({
+				name: $('[name~="name"]').val(),
+				age: $('[name~="age"]').val()
+			});
+		}
+	});
+
 	var InvoiceItemModel = Backbone.Model.extend({
 
 			//Set default values.
@@ -69,6 +122,9 @@
 			}
 		});
 
+	
+
+
 	var Workspace = Backbone.Router.extend({
 		routes : {
 			//Default path
@@ -76,9 +132,12 @@
 
 			//Use of static path
 			'invoice': 'invoiceList',
-
+ 
 			//Use of fragment parameter
 			'invoice/:id': 'invoicePage',
+
+			//Use of Backbone.Validation to validate the form
+			'validate': 'isvalidate'
 		},
 
 		invoiceList: function(){
@@ -94,6 +153,16 @@
 				id: id
 			});
 			invoicePageView.render();
+		},
+
+		isvalidate: function(){
+			var buyerModel = new BuyerModel();
+			var buyerModelFormView = new BuyerModelFormView({
+				el: 'body',
+				model: buyerModel
+			});
+
+			buyerModelFormView.render();
 		}
 	});
 
